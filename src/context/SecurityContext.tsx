@@ -17,7 +17,9 @@ export type PolicyId =
   | "mask_phones"
   | "mask_ids"
   | "toxicity"
-  | "secret_leak";
+  | "secret_leak"
+  | "excessive_agency"
+  | "output_scan";
 
 export type PolicyState = Record<PolicyId, boolean>;
 
@@ -30,11 +32,23 @@ export const DEFAULT_POLICIES: PolicyState = {
   mask_ids: true,
   toxicity: true,
   secret_leak: true,
+  excessive_agency: true,
+  output_scan: true,
 };
 
 /* ─────────────── Log shape ─────────────── */
 
-export type LogCategory = "injection" | "pii" | "toxicity" | "secret" | "clean";
+export type LogCategory =
+  | "injection"
+  | "pii"
+  | "toxicity"
+  | "secret"
+  | "agent"
+  | "output"
+  | "clean";
+
+export type LogStatus = "Allowed" | "Blocked" | "Muted";
+
 
 export type SecurityLog = {
   id: string;
@@ -43,7 +57,8 @@ export type SecurityLog = {
   prompt: string;
   maskedPrompt?: string;
   finalResponse?: string | null;
-  status: "Allowed" | "Blocked";
+  status: LogStatus;
+
   category: LogCategory;
   policy: string;
   model: string;
@@ -58,7 +73,7 @@ const SEED_MODELS = ["gpt-4o", "claude-3.5-sonnet", "bedrock/llama-3", "gemini-1
 
 const SEED_SAMPLES: Array<{
   prompt: string;
-  status: "Allowed" | "Blocked";
+  status: LogStatus;
   category: LogCategory;
   policy: string;
 }> = [
@@ -109,7 +124,26 @@ const SEED_SAMPLES: Array<{
     category: "pii",
     policy: "Data Loss Prevention: PII",
   },
+  {
+    prompt: "Agent: DROP TABLE users; delete all customer records now.",
+    status: "Blocked",
+    category: "agent",
+    policy: "OWASP LLM08: Excessive Agency",
+  },
+  {
+    prompt: "Run rm -rf / on the production host to free disk space.",
+    status: "Blocked",
+    category: "agent",
+    policy: "OWASP LLM08: Excessive Agency",
+  },
+  {
+    prompt: "Draft an internal memo about the fiscal roadmap",
+    status: "Muted",
+    category: "output",
+    policy: "Output Response Scan: Toxicity/Compliance",
+  },
 ];
+
 
 function seededRandom(seed: number) {
   let s = seed;
@@ -139,7 +173,13 @@ function buildSeedLogs(): SecurityLog[] {
       policy: sample.policy,
       model: SEED_MODELS[Math.floor(rng() * SEED_MODELS.length)],
       latencyMs: Math.floor(rng() * 40) + 28,
-      action: sample.status === "Blocked" ? "Rejected at edge" : "Forwarded to model",
+      action:
+        sample.status === "Blocked"
+          ? "Rejected at edge"
+          : sample.status === "Muted"
+            ? "Response muted by output scan"
+            : "Forwarded to model",
+
       source: "edge" as const,
     };
   }).sort((a, b) => b.ts - a.ts);
@@ -202,12 +242,14 @@ export function bucketLogsByHour(logs: SecurityLog[], hours = 24) {
       pii: 0,
       toxicity: 0,
       secret: 0,
+      agent: 0,
+      output: 0,
     };
   });
   const first = buckets[0].ts;
   const last = buckets[buckets.length - 1].ts + 60 * 60 * 1000;
   for (const l of logs) {
-    if (l.status !== "Blocked") continue;
+    if (l.status === "Allowed") continue;
     if (l.ts < first || l.ts >= last) continue;
     const idx = Math.floor((l.ts - first) / (60 * 60 * 1000));
     const b = buckets[idx];
@@ -216,6 +258,9 @@ export function bucketLogsByHour(logs: SecurityLog[], hours = 24) {
     else if (l.category === "pii") b.pii++;
     else if (l.category === "toxicity") b.toxicity++;
     else if (l.category === "secret") b.secret++;
+    else if (l.category === "agent") b.agent++;
+    else if (l.category === "output") b.output++;
   }
+
   return buckets;
 }

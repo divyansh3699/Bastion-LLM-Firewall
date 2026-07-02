@@ -77,8 +77,16 @@ const GROUPS: Group[] = [
         description: "Rejects prompts containing terms on your custom blocklist.",
         reference: "Custom policy · edge dictionary",
       },
+      {
+        id: "excessive_agency",
+        label: "Excessive Agency Control",
+        description:
+          "Intercepts agent tool calls attempting privileged actions (shell, SQL, file deletion).",
+        reference: "OWASP Top 10 for LLMs — LLM08",
+      },
     ],
   },
+
   {
     key: "dlp",
     title: "Data Privacy (DLP)",
@@ -125,6 +133,14 @@ const GROUPS: Group[] = [
         description: "Scans model output for API keys, tokens, and private keys.",
         reference: "Guardrails AI · SecretsPresent",
       },
+      {
+        id: "output_scan",
+        label: "Output Response Scan",
+        description:
+          "Bi-directional scan of model output for hallucinations, compliance and safety violations. Muted responses are replaced with a redacted warning.",
+        reference: "Guardrails AI · ProvenanceLLM + NeMo topical rails",
+      },
+
     ],
   },
 ];

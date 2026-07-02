@@ -41,44 +41,57 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /* Legacy token names retained; retinted for the Deep Space Stealth palette.
+     ember  → electric neon cyan  (primary accent)
+     amber-glow → neon teal-green (secondary highlight in gradients)
+     violet → neon purple (secondary/warning) */
   --color-ember: var(--ember);
   --color-amber-glow: var(--amber-glow);
+  --color-violet: var(--violet);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-hairline: var(--hairline);
 
-  --shadow-glow: 0 0 60px -10px color-mix(in oklab, var(--ember) 55%, transparent);
-  --shadow-panel: 0 1px 0 0 color-mix(in oklab, white 6%, transparent) inset,
-                  0 30px 60px -30px color-mix(in oklab, black 80%, transparent);
+  --shadow-glow: 0 0 42px -6px color-mix(in oklab, var(--ember) 70%, transparent),
+                 0 0 12px -2px color-mix(in oklab, var(--ember) 50%, transparent);
+  --shadow-glow-violet: 0 0 42px -6px color-mix(in oklab, var(--violet) 65%, transparent);
+  --shadow-glow-danger: 0 0 32px -4px color-mix(in oklab, var(--destructive) 70%, transparent);
+  --shadow-panel: 0 1px 0 0 color-mix(in oklab, white 5%, transparent) inset,
+                  0 30px 60px -30px color-mix(in oklab, black 90%, transparent),
+                  0 0 0 1px color-mix(in oklab, var(--ember) 6%, transparent);
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 
-  --ember: oklch(0.72 0.19 55);        /* #F6821F Cloudflare orange */
-  --amber-glow: oklch(0.82 0.16 75);   /* #FBAD41 */
-  --ink: oklch(0.14 0.02 265);         /* deep near-black */
-  --ink-2: oklch(0.19 0.02 265);
-  --hairline: oklch(1 0 0 / 8%);
+  /* Deep Space Stealth palette */
+  --ember: oklch(0.88 0.17 195);        /* #00F2FE electric cyan */
+  --amber-glow: oklch(0.90 0.20 165);   /* #0DFFB2 neon teal-green */
+  --violet: oklch(0.62 0.24 305);       /* #9D4EDD neon purple */
+  --ink: oklch(0.16 0.02 260);
+  --ink-2: oklch(0.20 0.025 260);
+  --hairline: oklch(0.85 0.08 200 / 12%);
 
-  --background: oklch(0.09 0.015 265);
-  --foreground: oklch(0.98 0.005 260);
-  --card: oklch(0.14 0.018 265);
-  --card-foreground: oklch(0.98 0.005 260);
-  --popover: oklch(0.14 0.018 265);
-  --popover-foreground: oklch(0.98 0.005 260);
+  /* Ultra-dark slate-indigo background (#0A0D14 vibe) */
+  --background: oklch(0.14 0.02 260);
+  --foreground: oklch(0.97 0.008 230);
+  /* Glassmorphism-ready card surfaces */
+  --card: oklch(0.19 0.025 260 / 70%);
+  --card-foreground: oklch(0.97 0.008 230);
+  --popover: oklch(0.19 0.025 260);
+  --popover-foreground: oklch(0.97 0.008 230);
   --primary: var(--ember);
-  --primary-foreground: oklch(0.12 0.02 265);
-  --secondary: oklch(0.22 0.02 265);
-  --secondary-foreground: oklch(0.98 0.005 260);
-  --muted: oklch(0.18 0.018 265);
-  --muted-foreground: oklch(0.68 0.02 260);
-  --accent: oklch(0.22 0.02 265);
-  --accent-foreground: oklch(0.98 0.005 260);
-  --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 260);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
+  --primary-foreground: oklch(0.12 0.02 260);
+  --secondary: oklch(0.24 0.03 275);
+  --secondary-foreground: oklch(0.97 0.008 230);
+  --muted: oklch(0.22 0.02 260);
+  --muted-foreground: oklch(0.74 0.02 230);   /* silver-gray */
+  --accent: oklch(0.28 0.06 285);
+  --accent-foreground: oklch(0.97 0.008 230);
+  --destructive: oklch(0.66 0.26 20);         /* crimson neon */
+  --destructive-foreground: oklch(0.99 0.005 230);
+  --border: oklch(0.85 0.08 200 / 14%);
+  --input: oklch(0.85 0.08 200 / 18%);
   --ring: var(--ember);
 }
 
@@ -86,37 +99,52 @@
   * { border-color: var(--color-border); }
   html { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
   body {
-    background-color: var(--color-background);
+    background-color: #0A0D14;
     color: var(--color-foreground);
     background-image:
-      radial-gradient(ellipse 60% 40% at 50% -10%, color-mix(in oklab, var(--ember) 22%, transparent), transparent 60%),
-      radial-gradient(ellipse 40% 30% at 90% 10%, color-mix(in oklab, var(--amber-glow) 12%, transparent), transparent 60%);
+      radial-gradient(ellipse 55% 40% at 50% -5%, color-mix(in oklab, var(--ember) 22%, transparent), transparent 60%),
+      radial-gradient(ellipse 45% 35% at 92% 8%, color-mix(in oklab, var(--violet) 22%, transparent), transparent 60%),
+      radial-gradient(ellipse 40% 40% at 5% 92%, color-mix(in oklab, var(--amber-glow) 12%, transparent), transparent 65%);
     background-attachment: fixed;
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
   code, kbd, .mono { font-family: var(--font-mono); }
+
+  ::selection { background: color-mix(in oklab, var(--ember) 45%, transparent); color: #0A0D14; }
 }
 
 @utility grid-bg {
   background-image:
-    linear-gradient(to right, color-mix(in oklab, white 4%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, white 4%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in oklab, var(--ember) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--ember) 8%, transparent) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent 75%);
 }
 
 @utility text-gradient-ember {
-  background: linear-gradient(100deg, var(--ember) 0%, var(--amber-glow) 60%, #fff 120%);
+  background: linear-gradient(100deg, var(--ember) 0%, var(--amber-glow) 55%, var(--violet) 130%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 @utility panel {
-  background: linear-gradient(180deg, color-mix(in oklab, white 3%, transparent), transparent),
-              var(--card);
+  background:
+    linear-gradient(180deg, color-mix(in oklab, white 4%, transparent), transparent),
+    color-mix(in oklab, var(--card) 92%, transparent);
   border: 1px solid var(--hairline);
   box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+@utility btn-glow {
+  background: color-mix(in oklab, var(--ember) 10%, transparent);
+  border: 1px solid color-mix(in oklab, var(--ember) 55%, transparent);
+  color: var(--ember);
+  box-shadow:
+    0 0 22px -4px color-mix(in oklab, var(--ember) 50%, transparent),
+    inset 0 0 12px -6px color-mix(in oklab, var(--ember) 60%, transparent);
+  transition: all 0.2s ease;
 }
 
 @keyframes flow-dash {

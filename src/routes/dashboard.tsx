@@ -12,7 +12,10 @@ import {
   Ban,
   X,
   BookOpen,
+  VolumeX,
+  Bot,
 } from "lucide-react";
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -25,7 +28,7 @@ import {
   Line,
   LineChart,
 } from "recharts";
-import { useSecurity, bucketLogsByHour, type SecurityLog } from "@/context/SecurityContext";
+import { useSecurity, bucketLogsByHour, type SecurityLog, type LogStatus } from "@/context/SecurityContext";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -58,16 +61,29 @@ function Dashboard() {
   const threatData = useMemo(() => bucketLogsByHour(logs, 24), [logs]);
 
   const totalBlocked = useMemo(
-    () => logs.filter((l) => l.status === "Blocked").length,
+    () => logs.filter((l) => l.status === "Blocked" || l.status === "Muted").length,
     [logs],
   );
   const totalRequests = logs.length;
   const piiBlocked = useMemo(
-    () => logs.filter((l) => l.category === "pii" && l.status === "Blocked").length,
+    () => logs.filter((l) => l.category === "pii" && l.status !== "Allowed").length,
     [logs],
   );
   const injectionBlocked = useMemo(
     () => logs.filter((l) => l.category === "injection").length,
+    [logs],
+  );
+  const agentBlocked = useMemo(
+    () => logs.filter((l) => l.category === "agent").length,
+    [logs],
+  );
+  const outputMuted = useMemo(
+    () =>
+      logs.filter(
+        (l) =>
+          l.status === "Muted" ||
+          (l.status === "Blocked" && (l.category === "output" || l.category === "toxicity" || l.category === "secret")),
+      ).length,
     [logs],
   );
   const activePolicies = useMemo(
@@ -75,6 +91,10 @@ function Dashboard() {
     [policies],
   );
   const totalPolicies = Object.keys(policies).length;
+
+  // Dynamic latency overhead: base + ~6ms per active guardrail
+  const latencyOverhead = 22 + activePolicies * 6;
+  const p95Overhead = latencyOverhead + 29;
 
   const stats = useMemo(
     () => [
@@ -93,6 +113,20 @@ function Dashboard() {
         tone: "danger" as const,
       },
       {
+        label: "Agent Tools Blocked",
+        value: agentBlocked.toLocaleString(),
+        delta: "OWASP LLM08 · Excessive Agency",
+        icon: <Bot className="w-4 h-4" />,
+        tone: "danger" as const,
+      },
+      {
+        label: "Output Violations Deflected",
+        value: outputMuted.toLocaleString(),
+        delta: "Toxicity · Secrets · Compliance",
+        icon: <VolumeX className="w-4 h-4" />,
+        tone: "danger" as const,
+      },
+      {
         label: "Active Policies",
         value: `${activePolicies}`,
         delta: `${activePolicies}/${totalPolicies} enabled`,
@@ -101,14 +135,27 @@ function Dashboard() {
       },
       {
         label: "Avg. Latency Overhead",
-        value: "+42ms",
-        delta: "p95 +71ms",
+        value: `+${latencyOverhead}ms`,
+        delta: `p95 +${p95Overhead}ms · scales with policies`,
         icon: <Timer className="w-4 h-4" />,
         tone: "neutral" as const,
       },
     ],
-    [totalRequests, totalBlocked, piiBlocked, injectionBlocked, activePolicies, totalPolicies, logs],
+    [
+      totalRequests,
+      totalBlocked,
+      piiBlocked,
+      injectionBlocked,
+      agentBlocked,
+      outputMuted,
+      activePolicies,
+      totalPolicies,
+      latencyOverhead,
+      p95Overhead,
+      logs,
+    ],
   );
+
 
   return (
     <div className="min-h-screen text-foreground">
@@ -123,23 +170,17 @@ function Dashboard() {
               analytics
             </span>
           </Link>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <Link
-              to="/docs"
-              className="hover:text-foreground inline-flex items-center gap-1.5"
-            >
-              <BookOpen className="w-4 h-4" /> Docs
+          <nav className="flex items-center gap-1">
+            <Link to="/docs" className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold tracking-wide text-sm text-foreground/80 hover:text-ember hover:bg-ember/10 transition-all duration-200">
+              <BookOpen className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Docs
             </Link>
-            <Link
-              to="/sandbox"
-              className="hover:text-foreground inline-flex items-center gap-1.5"
-            >
-              <FlaskConical className="w-4 h-4" /> Sandbox
+            <Link to="/sandbox" className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold tracking-wide text-sm text-foreground/80 hover:text-ember hover:bg-ember/10 transition-all duration-200">
+              <FlaskConical className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Sandbox
             </Link>
-            <Link to="/" className="hover:text-foreground inline-flex items-center gap-1.5">
-              <ArrowLeft className="w-4 h-4" /> Home
+            <Link to="/" className="group inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold tracking-wide text-sm text-foreground/80 hover:text-ember hover:bg-ember/10 transition-all duration-200">
+              <ArrowLeft className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Home
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
@@ -159,7 +200,7 @@ function Dashboard() {
         </div>
 
         {/* Stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {stats.map((s) => (
             <div
               key={s.label}
@@ -245,19 +286,23 @@ function Dashboard() {
                   <Bar
                     dataKey="injection"
                     stackId="a"
-                    fill="#F6821F"
+                    fill="#00F2FE"
                     name="Prompt Injection"
                     radius={[0, 0, 0, 0]}
                   />
-                  <Bar dataKey="pii" stackId="a" fill="#FBAD41" name="PII Leaks" />
+                  <Bar dataKey="pii" stackId="a" fill="#0DFFB2" name="PII Leaks" />
+                  <Bar dataKey="toxicity" stackId="a" fill="#9D4EDD" name="Toxicity" />
+                  <Bar dataKey="secret" stackId="a" fill="#22D3EE" name="Secret Leak" />
+                  <Bar dataKey="agent" stackId="a" fill="#FF3B6B" name="Agent Tool" />
                   <Bar
-                    dataKey="toxicity"
+                    dataKey="output"
                     stackId="a"
-                    fill="#a855f7"
-                    name="Toxicity"
+                    fill="#7C3AED"
+                    name="Output Muted"
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
+
               ) : (
                 <LineChart data={threatData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
@@ -288,7 +333,7 @@ function Dashboard() {
                   <Line
                     type="monotone"
                     dataKey="injection"
-                    stroke="#F6821F"
+                    stroke="#00F2FE"
                     strokeWidth={2}
                     dot={false}
                     name="Prompt Injection"
@@ -296,7 +341,7 @@ function Dashboard() {
                   <Line
                     type="monotone"
                     dataKey="pii"
-                    stroke="#FBAD41"
+                    stroke="#0DFFB2"
                     strokeWidth={2}
                     dot={false}
                     name="PII Leaks"
@@ -304,12 +349,29 @@ function Dashboard() {
                   <Line
                     type="monotone"
                     dataKey="toxicity"
-                    stroke="#a855f7"
+                    stroke="#9D4EDD"
                     strokeWidth={2}
                     dot={false}
                     name="Toxicity"
                   />
+                  <Line
+                    type="monotone"
+                    dataKey="agent"
+                    stroke="#FF3B6B"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Agent Tool"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="output"
+                    stroke="#7C3AED"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Output Muted"
+                  />
                 </LineChart>
+
               )}
             </ResponsiveContainer>
           </div>
@@ -373,11 +435,18 @@ function Dashboard() {
   );
 }
 
-function StatusPill({ status }: { status: "Allowed" | "Blocked" }) {
+function StatusPill({ status }: { status: LogStatus }) {
   if (status === "Blocked") {
     return (
       <span className="inline-flex items-center gap-1.5 rounded px-2 py-0.5 mono text-[10px] uppercase tracking-widest bg-red-500/15 text-red-300 border border-red-500/30">
         <Ban className="w-3 h-3" /> Blocked
+      </span>
+    );
+  }
+  if (status === "Muted") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded px-2 py-0.5 mono text-[10px] uppercase tracking-widest bg-purple-500/15 text-purple-300 border border-purple-500/30">
+        <VolumeX className="w-3 h-3" /> Muted
       </span>
     );
   }
@@ -387,6 +456,7 @@ function StatusPill({ status }: { status: "Allowed" | "Blocked" }) {
     </span>
   );
 }
+
 
 function LogDialog({ log, onClose }: { log: LogRow; onClose: () => void }) {
   return (

@@ -13,6 +13,12 @@ import {
   CheckCircle2,
   Github,
   FlaskConical,
+  Layers,
+  Sparkles,
+  Boxes,
+  BarChart3,
+  FileLock2,
+  FileText,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -38,6 +44,8 @@ function Landing() {
 /* ───────────────────────── Nav ───────────────────────── */
 
 function Nav() {
+  const linkBase =
+    "group inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold tracking-wide text-sm text-foreground/80 hover:text-ember hover:bg-ember/10 transition-all duration-200";
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-background/60 border-b border-hairline">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
@@ -50,14 +58,28 @@ function Nav() {
             v0.1
           </span>
         </a>
-        <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#architecture" className="hover:text-foreground transition-colors">Architecture</a>
-          <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-          <a href="#stack" className="hover:text-foreground transition-colors">Stack</a>
-          <Link to="/docs" className="hover:text-foreground transition-colors">Docs</Link>
-          <Link to="/dashboard" className="hover:text-foreground transition-colors">Analytics</Link>
-          <Link to="/policies" className="hover:text-foreground transition-colors">Policies</Link>
-          <Link to="/sandbox" className="hover:text-foreground transition-colors inline-flex items-center gap-1"><FlaskConical className="w-3.5 h-3.5" /> Sandbox</Link>
+        <nav className="hidden md:flex items-center gap-1">
+          <a href="#architecture" className={linkBase}>
+            <Layers className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Architecture
+          </a>
+          <a href="#features" className={linkBase}>
+            <Sparkles className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Features
+          </a>
+          <a href="#stack" className={linkBase}>
+            <Boxes className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Stack
+          </a>
+          <Link to="/docs" className={linkBase}>
+            <FileText className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Docs
+          </Link>
+          <Link to="/dashboard" className={linkBase}>
+            <BarChart3 className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Analytics
+          </Link>
+          <Link to="/policies" className={linkBase}>
+            <FileLock2 className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Policies
+          </Link>
+          <Link to="/sandbox" className={linkBase}>
+            <FlaskConical className="w-4 h-4 transition-colors duration-200 group-hover:text-ember" strokeWidth={1.5} /> Sandbox
+          </Link>
         </nav>
         <div className="flex items-center gap-2">
           <a href="#" className="hidden sm:inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -239,8 +261,8 @@ function FlowDiagram() {
       <svg viewBox="0 0 1000 220" className="w-full h-auto" role="img" aria-label="Request flow diagram">
         <defs>
           <linearGradient id="lg" x1="0" x2="1">
-            <stop offset="0%" stopColor="#F6821F" />
-            <stop offset="100%" stopColor="#FBAD41" />
+            <stop offset="0%" stopColor="#00F2FE" />
+            <stop offset="100%" stopColor="#0DFFB2" />
           </linearGradient>
           <filter id="glow"><feGaussianBlur stdDeviation="3" /></filter>
         </defs>
@@ -251,34 +273,34 @@ function FlowDiagram() {
 
         {/* User */}
         <g>
-          <circle cx="100" cy="110" r="42" fill="#141420" stroke="#ffffff14" />
+          <circle cx="100" cy="110" r="42" fill="#0F1320" stroke="#ffffff14" />
           <text x="100" y="115" textAnchor="middle" fontFamily="JetBrains Mono" fontSize="11" fill="#e5e7eb">USER</text>
         </g>
 
         {/* Firewall */}
         <g>
-          <rect x="380" y="40" width="240" height="140" rx="16" fill="#141420" stroke="url(#lg)" strokeWidth="1.5" />
-          <rect x="380" y="40" width="240" height="140" rx="16" fill="url(#lg)" opacity="0.06" />
-          <text x="500" y="70" textAnchor="middle" fontFamily="Space Grotesk" fontSize="16" fontWeight="600" fill="#F6821F">BASTION</text>
+          <rect x="380" y="40" width="240" height="140" rx="16" fill="#0F1320" stroke="url(#lg)" strokeWidth="1.5" />
+          <rect x="380" y="40" width="240" height="140" rx="16" fill="url(#lg)" opacity="0.08" />
+          <text x="500" y="70" textAnchor="middle" fontFamily="Space Grotesk" fontSize="16" fontWeight="600" fill="#00F2FE">BASTION</text>
           <text x="500" y="88" textAnchor="middle" fontFamily="JetBrains Mono" fontSize="9" fill="#94a3b8" letterSpacing="2">FIREWALL</text>
 
           <g fontFamily="JetBrains Mono" fontSize="10" fill="#cbd5e1">
-            <rect x="400" y="102" width="90" height="22" rx="6" fill="#0f172a" stroke="#ffffff10" />
+            <rect x="400" y="102" width="90" height="22" rx="6" fill="#0A0D14" stroke="#00F2FE22" />
             <text x="445" y="117" textAnchor="middle">filter</text>
-            <rect x="500" y="102" width="90" height="22" rx="6" fill="#0f172a" stroke="#ffffff10" />
+            <rect x="500" y="102" width="90" height="22" rx="6" fill="#0A0D14" stroke="#00F2FE22" />
             <text x="545" y="117" textAnchor="middle">mask</text>
-            <rect x="400" y="132" width="90" height="22" rx="6" fill="#0f172a" stroke="#ffffff10" />
+            <rect x="400" y="132" width="90" height="22" rx="6" fill="#0A0D14" stroke="#9D4EDD33" />
             <text x="445" y="147" textAnchor="middle">policy</text>
-            <rect x="500" y="132" width="90" height="22" rx="6" fill="#0f172a" stroke="#ffffff10" />
+            <rect x="500" y="132" width="90" height="22" rx="6" fill="#0A0D14" stroke="#9D4EDD33" />
             <text x="545" y="147" textAnchor="middle">inspect</text>
           </g>
         </g>
 
         {/* LLM */}
         <g>
-          <circle cx="900" cy="110" r="42" fill="#141420" stroke="url(#lg)" />
-          <circle cx="900" cy="110" r="42" fill="url(#lg)" opacity="0.15" filter="url(#glow)" />
-          <text x="900" y="115" textAnchor="middle" fontFamily="JetBrains Mono" fontSize="11" fill="#F6821F">LLM</text>
+          <circle cx="900" cy="110" r="42" fill="#0F1320" stroke="url(#lg)" />
+          <circle cx="900" cy="110" r="42" fill="url(#lg)" opacity="0.18" filter="url(#glow)" />
+          <text x="900" y="115" textAnchor="middle" fontFamily="JetBrains Mono" fontSize="11" fill="#00F2FE">LLM</text>
         </g>
       </svg>
     </div>
